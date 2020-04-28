@@ -1,6 +1,6 @@
 {
-  "name": "helmetdetection",
-  "version": "0.0.0",
+  "name": "maskdetection",
+  "version": "0.0.1",
   "description": "Testing Mask detection model in TensorFlow.js",
   "main": "dist/index.js",
   "unpkg": "dist/mask-detection.min.js",
