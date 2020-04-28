@@ -5,12 +5,12 @@ export interface MaskDetectionClass {
   }
   
   export const CLASSES: {[key: string]: MaskDetectionClass} = {
-    1: {
+    2: {
       name: 'person',
       id: 1,
       displayName: 'person',
     },
-    2: {
+    1: {
       name: 'mask',
       id: 2,
       displayName: 'person with mask',
