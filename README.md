@@ -1,6 +1,6 @@
-# Helmet Detection
+# Mask Detection
 
-Helmet detection model that aims to localize, identify and distinguish workers wearing security helmets from those not wearing security helmets in a single image.
+Mask detection model that aims to localize, identify and distinguish workers wearing security masks from those not wearing security masks in a single image.
 
 
 This TensorFlow.js model does not require you to know about machine learning.
@@ -16,12 +16,12 @@ There are one main way to get this model in your JavaScript project : by install
 ```js
 // Note: you do not need to import @tensorflow/tfjs here.
 
-import * as helmet from 'helmet-detection';
+import * as mask from 'maskdetection';
 
 const img = document.getElementById('img');
 
 // Load the model.
-const model = await helmet.load(PATH_TO_JSON_MODEL);
+const model = await mask.load(PATH_TO_JSON_MODEL);
 
 // Classify the image.
 const predictions = await model.detect(img);
@@ -33,11 +33,11 @@ console.log(predictions);
 ## API
 
 #### Loading the model
-`helmet-detection` is the module name. When using ES6 imports, `helmet` is the module.
+`maskdetection` is the module name. When using ES6 imports, `mask` is the module.
 
 ```ts
 
-helmet.load(PATH_TO_JSON_MODEL);
+mask.load(PATH_TO_JSON_MODEL);
 ```
 
 Args:
@@ -47,10 +47,10 @@ Returns a `model` object.
 
 #### Detecting workers 
 
-You can detect workers wearing helmets and those who are not with the model without needing to create a Tensor.
+You can detect workers wearing masks and those who are not with the model without needing to create a Tensor.
 `model.detect` takes an input image element and returns an array of bounding boxes with class name and confidence level.
 
-This method exists on the model that is loaded from `helmet.load`.
+This method exists on the model that is loaded from `mask.load`.
 
 ```ts
 model.detect(
@@ -72,7 +72,7 @@ Returns an array of classes and probabilities that looks like:
   score: 0.8380282521247864
 }, {
   bbox: [x, y, width, height],
-  class: "person with helmet",
+  class: "person with mask",
   score: 0.74644153267145157
 }]
 ```
