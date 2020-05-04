@@ -32,6 +32,9 @@ export class MaskDetection {
   }
 
   async load() {
+    tf.enableProdMode()
+    tf.setBackend('webgl')
+    tf.webgl.forceHalfFloat()
     this.model = await tfconv.loadGraphModel(this.modelPath);
 
     // Warmup the model.
@@ -50,6 +53,7 @@ export class MaskDetection {
   private async infer(
       img: tf.Tensor3D|ImageData|HTMLImageElement|HTMLCanvasElement|
       HTMLVideoElement): Promise<DetectedMask[]> {
+        
     tf.enableProdMode()
     tf.setBackend('webgl')
     tf.webgl.forceHalfFloat()
@@ -79,7 +83,6 @@ export class MaskDetection {
       }
     }
 
-    tf.engine().startScope()
     // model returns three main tensors:
     // 1. box classification score 
     // 2. box location 
@@ -111,7 +114,6 @@ export class MaskDetection {
 
       // restore previous backend
       tf.setBackend(prevBackend);
-      tf.engine().endScope()
       return this.buildDetectedObjects(
           width, height, boxes, scores, indexes, detection_classes);
       }
