@@ -12,7 +12,7 @@ export interface DetectedMask {
   score: number;
 }
 
-export async function load(path : string, modelJson? : tf.io.ModelJSON, modelWeights? : number) {
+export async function load(path : string, nativeapp? : boolean, modelJson? : tf.io.ModelJSON, modelWeights? : number) {
   if (tf == null) {
     throw new Error(
         `Cannot find TensorFlow.js. If you are using a <script> tag, please ` +
@@ -21,7 +21,9 @@ export async function load(path : string, modelJson? : tf.io.ModelJSON, modelWei
 
   const maskDetection = new MaskDetection(path);
   if(modelJson && modelWeights){
-    await maskDetection.load(modelJson,modelWeights)
+    await maskDetection.load(true, modelJson,modelWeights)
+  } else if (nativeapp) {
+    await maskDetection.load(nativeapp);
   } else {
     await maskDetection.load();
   }
@@ -36,9 +38,11 @@ export class MaskDetection {
     this.modelPath = path;
   }
 
-  async load(modelJson? : tf.io.ModelJSON, modelWeights? : number) {
+  async load(nativeapp? : boolean, modelJson? : tf.io.ModelJSON, modelWeights? : number) {
     if(modelJson && modelWeights){
       this.model = await tfconv.loadGraphModel(native.bundleResourceIO(modelJson, modelWeights))
+    } else if (nativeapp) {
+      this.model = await tfconv.loadGraphModel(native.asyncStorageIO(this.modelPath));
     } else {
       tf.enableProdMode()
       tf.setBackend('webgl')
