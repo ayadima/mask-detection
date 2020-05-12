@@ -1,6 +1,5 @@
 import * as tfconv from '@tensorflow/tfjs-converter';
 import * as tf from '@tensorflow/tfjs-core';
-import * as native from '@tensorflow/tfjs-react-native'
 
 export {version} from './version';
 import {CLASSES} from './classes';
@@ -12,7 +11,7 @@ export interface DetectedMask {
   score: number;
 }
 
-export async function load(path : string, modelJson? : tf.io.ModelJSON, modelWeights? : number) {
+export async function load(path : string) {
   if (tf == null) {
     throw new Error(
         `Cannot find TensorFlow.js. If you are using a <script> tag, please ` +
@@ -20,23 +19,19 @@ export async function load(path : string, modelJson? : tf.io.ModelJSON, modelWei
   }
 
   const maskDetection = new MaskDetection(path);
-  if(modelJson && modelWeights){
-    await maskDetection.load(modelJson,modelWeights)
-  } else {
-    await maskDetection.load();
-  }
+  await maskDetection.load();
   return maskDetection;
 }
 
-export async function loadNative(path : string) {
+export async function loadNative(handler : tf.io.IOHandler) {
   if (tf == null) {
     throw new Error(
         `Cannot find TensorFlow.js. If you are using a <script> tag, please ` +
         `also include @tensorflow/tfjs on the page before using this model.`);
   }
 
-  const maskDetection = new MaskDetection(path);
-  await maskDetection.loadNativeModel();
+  const maskDetection = new MaskDetection('Local Native');
+  await maskDetection.loadNativeModel(handler);
   return maskDetection;
 }
 
@@ -48,15 +43,12 @@ export class MaskDetection {
     this.modelPath = path;
   }
 
-  async load(modelJson? : tf.io.ModelJSON, modelWeights? : number) {
-    if(modelJson && modelWeights){
-      this.model = await tfconv.loadGraphModel(native.bundleResourceIO(modelJson, modelWeights))
-    } else {
+  async load() {
       tf.enableProdMode()
       tf.setBackend('webgl')
       tf.webgl.forceHalfFloat()
       this.model = await tfconv.loadGraphModel(this.modelPath);
-    }
+
         // Warmup the model.
         const result = await this.model.executeAsync(tf.zeros([1, 300, 300, 3])) as
         tf.Tensor[];
@@ -64,8 +56,8 @@ export class MaskDetection {
     result.map(t => t.dispose());
   }
 
-  async loadNativeModel() {
-    this.model = await tfconv.loadGraphModel(native.asyncStorageIO(this.modelPath));
+  async loadNativeModel(handler : tf.io.IOHandler) {
+    this.model = await tfconv.loadGraphModel(handler);
     // Warmup the model.
     const result = await this.model.executeAsync(tf.zeros([1, 300, 300, 3])) as
         tf.Tensor[];
