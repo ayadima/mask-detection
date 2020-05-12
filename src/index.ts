@@ -12,7 +12,7 @@ export interface DetectedMask {
   score: number;
 }
 
-export async function load(path : string, nativeapp? : boolean, modelJson? : tf.io.ModelJSON, modelWeights? : number) {
+export async function load(path : string, modelJson? : tf.io.ModelJSON, modelWeights? : number) {
   if (tf == null) {
     throw new Error(
         `Cannot find TensorFlow.js. If you are using a <script> tag, please ` +
@@ -21,12 +21,22 @@ export async function load(path : string, nativeapp? : boolean, modelJson? : tf.
 
   const maskDetection = new MaskDetection(path);
   if(modelJson && modelWeights){
-    await maskDetection.load(true, modelJson,modelWeights)
-  } else if (nativeapp) {
-    await maskDetection.load(nativeapp);
+    await maskDetection.load(modelJson,modelWeights)
   } else {
     await maskDetection.load();
   }
+  return maskDetection;
+}
+
+export async function loadNative(path : string) {
+  if (tf == null) {
+    throw new Error(
+        `Cannot find TensorFlow.js. If you are using a <script> tag, please ` +
+        `also include @tensorflow/tfjs on the page before using this model.`);
+  }
+
+  const maskDetection = new MaskDetection(path);
+  await maskDetection.loadNativeModel();
   return maskDetection;
 }
 
@@ -38,24 +48,31 @@ export class MaskDetection {
     this.modelPath = path;
   }
 
-  async load(nativeapp? : boolean, modelJson? : tf.io.ModelJSON, modelWeights? : number) {
+  async load(modelJson? : tf.io.ModelJSON, modelWeights? : number) {
     if(modelJson && modelWeights){
       this.model = await tfconv.loadGraphModel(native.bundleResourceIO(modelJson, modelWeights))
-    } else if (nativeapp) {
-      this.model = await tfconv.loadGraphModel(native.asyncStorageIO(this.modelPath));
     } else {
       tf.enableProdMode()
       tf.setBackend('webgl')
       tf.webgl.forceHalfFloat()
       this.model = await tfconv.loadGraphModel(this.modelPath);
     }
+        // Warmup the model.
+        const result = await this.model.executeAsync(tf.zeros([1, 300, 300, 3])) as
+        tf.Tensor[];
+    await Promise.all(result.map(t => t.data()));
+    result.map(t => t.dispose());
+  }
 
+  async loadNativeModel() {
+    this.model = await tfconv.loadGraphModel(native.asyncStorageIO(this.modelPath));
     // Warmup the model.
     const result = await this.model.executeAsync(tf.zeros([1, 300, 300, 3])) as
         tf.Tensor[];
     await Promise.all(result.map(t => t.data()));
     result.map(t => t.dispose());
   }
+
 
   /**
    * Infers through the model.
