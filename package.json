@@ -1,6 +1,6 @@
 {
   "name": "maskdetection",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "Testing Mask detection model in TensorFlow.js",
   "main": "dist/index.js",
   "unpkg": "dist/mask-detection.min.js",
@@ -14,7 +14,8 @@
   },
   "peerDependencies": {
     "@tensorflow/tfjs-converter": "1.6.0",
-    "@tensorflow/tfjs-core": "1.6.0"
+    "@tensorflow/tfjs-core": "1.6.0",
+    "@tensorflow/tfjs-react-native": "^0.2.3"
   },
   "devDependencies": {
     "@tensorflow/tfjs-converter": "1.6.0",
@@ -42,7 +43,5 @@
   },
   "license": "MIT",
   "author": "Ayadi Mahdi",
-  "dependencies": {
-    "@tensorflow/tfjs-react-native": "^0.2.3"
-  }
+  "dependencies": {}
 }
