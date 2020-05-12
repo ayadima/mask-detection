@@ -41,5 +41,8 @@
     "test": "yarn build && ts-node run_tests.ts"
   },
   "license": "MIT",
-  "author": "Ayadi Mahdi"
+  "author": "Ayadi Mahdi",
+  "dependencies": {
+    "@tensorflow/tfjs-react-native": "^0.2.3"
+  }
 }

@@ -1,5 +1,6 @@
 import * as tfconv from '@tensorflow/tfjs-converter';
 import * as tf from '@tensorflow/tfjs-core';
+import * as native from '@tensorflow/tfjs-react-native'
 
 export {version} from './version';
 import {CLASSES} from './classes';
@@ -11,7 +12,7 @@ export interface DetectedMask {
   score: number;
 }
 
-export async function load(path : string) {
+export async function load(path : string, modelJson? : tf.io.ModelJSON, modelWeights? : number) {
   if (tf == null) {
     throw new Error(
         `Cannot find TensorFlow.js. If you are using a <script> tag, please ` +
@@ -19,7 +20,11 @@ export async function load(path : string) {
   }
 
   const maskDetection = new MaskDetection(path);
-  await maskDetection.load();
+  if(modelJson && modelWeights){
+    await maskDetection.load(modelJson,modelWeights)
+  } else {
+    await maskDetection.load();
+  }
   return maskDetection;
 }
 
@@ -31,11 +36,15 @@ export class MaskDetection {
     this.modelPath = path;
   }
 
-  async load() {
-    tf.enableProdMode()
-    tf.setBackend('webgl')
-    tf.webgl.forceHalfFloat()
-    this.model = await tfconv.loadGraphModel(this.modelPath);
+  async load(modelJson? : tf.io.ModelJSON, modelWeights? : number) {
+    if(modelJson && modelWeights){
+      this.model = await tfconv.loadGraphModel(native.bundleResourceIO(modelJson, modelWeights))
+    } else {
+      tf.enableProdMode()
+      tf.setBackend('webgl')
+      tf.webgl.forceHalfFloat()
+      this.model = await tfconv.loadGraphModel(this.modelPath);
+    }
 
     // Warmup the model.
     const result = await this.model.executeAsync(tf.zeros([1, 300, 300, 3])) as
