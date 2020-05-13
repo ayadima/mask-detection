@@ -77,6 +77,13 @@ export class MaskDetection {
       HTMLVideoElement): Promise<DetectedMask[]> {
         
     tf.enableProdMode()
+    try{
+      tf.setBackend('webgl')
+    } catch(e) {
+      try {
+        tf.setBackend('rn-webgl')
+      }catch(e){}
+    }
     tf.webgl.forceHalfFloat()
     const batched = tf.tidy(() => {
       if (!(img instanceof tf.Tensor)) {
