@@ -56,10 +56,12 @@ export class MaskDetection {
   async loadNativeModel(handler : tf.io.IOHandler) {
     this.model = await tfconv.loadGraphModel(handler);
     // Warmup the model.
-    const result = await this.model.executeAsync(tf.zeros([1, 300, 300, 3])) as
-        tf.Tensor[];
+    const zeroTensor = tf.zeros([1, 300, 300, 3], 'int32');
+    // Warmup the model.
+    const result = await this.model.executeAsync(zeroTensor) as tf.Tensor[];
     await Promise.all(result.map(t => t.data()));
     result.map(t => t.dispose());
+    zeroTensor.dispose();
   }
 
 
